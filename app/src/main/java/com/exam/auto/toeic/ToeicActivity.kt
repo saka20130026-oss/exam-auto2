@@ -104,7 +104,6 @@ class ToeicActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         log("API 키: ${if (apiKey.isNotEmpty()) "설정됨" else "⚠️ 미설정 — 메인화면에서 설정하세요"}")
     }
 
-    override fun onTtsInit(status: Int) {}
     override fun onInit(status: Int) {
         if (status == TextToSpeech.SUCCESS) {
             tts.language = Locale.KOREAN
