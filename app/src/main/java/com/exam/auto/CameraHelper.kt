@@ -1,8 +1,6 @@
 package com.exam.auto
 
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.SurfaceTexture
 import android.hardware.usb.UsbDevice
 import android.util.Log
 import com.jiangdg.ausbc.MultiCameraClient
@@ -10,7 +8,6 @@ import com.jiangdg.ausbc.callback.ICameraStateCallBack
 import com.jiangdg.ausbc.callback.ICaptureCallBack
 import com.jiangdg.ausbc.camera.CameraUVC
 import com.jiangdg.ausbc.camera.bean.CameraRequest
-import java.io.ByteArrayOutputStream
 
 class CameraHelper(
     private val context: Context,
@@ -98,24 +95,20 @@ class CameraHelper(
                     callback(null)
                 }
                 override fun onComplete(path: String?) {
-                    // 경로 대신 비트맵으로 캡처
+                    if (path != null) {
+                        try {
+                            val file = java.io.File(path)
+                            if (file.exists()) {
+                                callback(file.readBytes())
+                                return
+                            }
+                        } catch (e: Exception) {
+                            Log.e("CameraHelper", "파일 읽기 실패", e)
+                        }
+                    }
                     callback(null)
                 }
             }, null)
-
-            // 비트맵 직접 캡처
-            currentCamera?.let { cam ->
-                if (cam is CameraUVC) {
-                    val bitmap = cam.captureVideoFrame()
-                    if (bitmap != null) {
-                        val baos = ByteArrayOutputStream()
-                        bitmap.compress(Bitmap.CompressFormat.JPEG, 95, baos)
-                        callback(baos.toByteArray())
-                        return
-                    }
-                }
-            }
-            callback(null)
         } catch (e: Exception) {
             Log.e("CameraHelper", "캡처 실패", e)
             callback(null)
